@@ -50,9 +50,9 @@ void (*ButtonTwoTask)(void);
 #define STACKSIZE		100      		// Number of 32-bit words in stack
 
 // Macros
-//#define blockSema								// Blocking sempahores
-//#define prioritySched						// Fixed priority scheduler
-//#define aging										// Dynamic priority scheculer with aging
+#define blockSema								// Blocking sempahores
+#define prioritySched						// Fixed priority scheduler
+#define aging										// Dynamic priority scheculer with aging
 
 // TCB Data Structure
 struct tcb {

@@ -74,7 +74,7 @@ void BSP_Joystick_Init(void){
 // Assumes: BSP_Joystick_Init() has been called
 #define SELECT    (*((volatile uint32_t *)0x40024040))  /* PE4 */
 void BSP_Joystick_Input(uint16_t *x, uint16_t *y, uint8_t *select){
-  ADC0_PSSI_R = 0x0002;            // 1) initiate SS1
+  ADC0_PSSI_R |= 0x0002;            // 1) initiate SS1
   while((ADC0_RIS_R&0x02)==0){};   // 2) wait for conversion done
   *x = ADC0_SSFIFO1_R;          // 3a) read first result
   *y = ADC0_SSFIFO1_R;          // 3b) read second result

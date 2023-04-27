@@ -8,6 +8,7 @@
 // Modified by Mustafa Hotaki 7/29/18, mkh3cf@virginia.edu
 
 #include <stdint.h>
+#include <stdlib.h>
 #include "OS.h"
 #include "tm4c123gh6pm.h"
 #include "LCD.h"
@@ -59,6 +60,40 @@ void Device_Init(void){
 	BSP_LCD_OutputInit();
 	BSP_Joystick_Init();
 }
+
+void Mic_Init(void){
+	SYSCTL_RCGCGPIO_R |= 0x00000008; 
+	while((SYSCTL_PRGPIO_R&0x8) != 0x8){};
+	// PD.0 Init
+	GPIO_PORTD_AFSEL_R |= 0x01;
+	GPIO_PORTD_DEN_R &= ~0x01;
+	GPIO_PORTD_AMSEL_R |= 0x01;
+	// ADC 0 Init Channel 7 Init
+	ADC0_ACTSS_R &= ~0x8;
+	ADC0_EMUX_R &= ~0xF000;
+	ADC0_SSMUX3_R = 7;
+	ADC0_SSCTL3_R |= (1<<1)|(1<<2);
+	ADC0_ACTSS_R |= 0x8;
+}
+
+uint16_t Sample_Microphone(void){
+	ADC0_PSSI_R |= 0x8;
+	while ((ADC0_RIS_R & 0x8) == 0){};
+	uint16_t adc_value = ADC0_SSFIFO3_R;
+	ADC0_ISC_R |= 0x8;
+	return adc_value;
+}
+
+void Random_Init(){
+	Mic_Init();
+	// Use Mic to set seed
+	uint16_t seed = Sample_Microphone();
+	srand(seed);
+}
+uint8_t getRandomNumber(void) {
+	return (uint8_t) rand();
+}
+
 //------------------Task 1--------------------------------
 // background thread executed at 20 Hz
 //******** Producer *************** 
@@ -372,6 +407,7 @@ int main(void){
   OS_Init();           // initialize, disable interrupts
 	Device_Init();
   CrossHair_Init();
+  Random_Init();
   DataLost = 0;        // lost data between producer and consumer
   NumSamples = 0;
   MaxJitter = 0;       // in 1us units
