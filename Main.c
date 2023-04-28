@@ -34,6 +34,8 @@ int16_t prevx, prevy;	// Previous x and y values of the crosshair
 uint8_t select;  			// joystick push
 uint8_t area[2];
 uint32_t PseudoCount;
+int16_t life = 3;
+int16_t score = 0;
 
 unsigned long NumCreated;   		// Number of foreground threads created
 unsigned long NumSamples;   		// Incremented every ADC sample, in Producer
@@ -223,8 +225,6 @@ void Consumer(void){
 		BSP_LCD_DrawCrosshair(prevx, prevy, LCD_BLACK); // Draw a black crosshair
 		BSP_LCD_DrawCrosshair(data.x, data.y, LCD_RED); // Draw a red crosshair
 
-		BSP_LCD_Message(1, 5, 3, "X: ", x);		
-		BSP_LCD_Message(1, 5, 12, "Y: ", y);
 		ConsumerCount++;
 		OS_bSignal(&LCDFree);
 		prevx = data.x; 
@@ -334,7 +334,9 @@ void PeriodicUpdater(void){
 void Display(void){
 	while(NumSamples < RUNLENGTH){
 		OS_bWait(&LCDFree);
-		BSP_LCD_Message(1,4,0,"PseudoCount: ",PseudoCount);
+		BSP_LCD_Message(1, 5, 0, "Life:",life);		
+		BSP_LCD_Message(1, 5, 9, "Score:",score);
+		//BSP_LCD_Message(1,4,0,"PseudoCount: ",PseudoCount);
 		DisplayCount++;
 		OS_bSignal(&LCDFree);
 		//OS_Sleep(1);
@@ -372,6 +374,8 @@ void Restart(void){
   UpdateWork = 0;
 	MaxJitter = 0;       // in 1us units
 	PseudoCount = 0;
+	life = 3;
+	score = 0;
 	x = 63; y = 63;
 	NumCreated += OS_AddThread(&Consumer,128,1); 
 	NumCreated += OS_AddThread(&Display,128,3);
