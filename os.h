@@ -205,6 +205,16 @@ unsigned long OS_MsTime(void);
 // It is ok to limit the range of theTimeSlice to match the 24-bit SysTick
 void OS_Launch(unsigned long theTimeSlice);
 
+void OS_InitBuzzer(void);
+
+void OS_CreateSound(int frequency);
+
+void OS_StopSound(void);
+
+void OS_Music(int notes[3]);
+
+void delay(int count);
+
 void Scheduler(void);
 void InitTimer1A(unsigned long period, uint32_t priority);
 void InitTimer2A(unsigned long period); 

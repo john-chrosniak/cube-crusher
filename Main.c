@@ -377,6 +377,8 @@ void Restart(void){
 	life = 3;
 	score = 0;
 	x = 63; y = 63;
+	int noteArray[3] = {2, 3, 4};
+	OS_Music(noteArray);
 	NumCreated += OS_AddThread(&Consumer,128,1); 
 	NumCreated += OS_AddThread(&Display,128,3);
   OS_Kill();  // done, OS does not return from a Kill
@@ -408,6 +410,7 @@ void CrossHair_Init(void){
 
 //******************* Main Function**********
 int main(void){ 
+	OS_InitBuzzer();     //	initialize buzzer hardware
   OS_Init();           // initialize, disable interrupts
 	Device_Init();
   CrossHair_Init();

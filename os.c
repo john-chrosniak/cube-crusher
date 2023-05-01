@@ -730,3 +730,43 @@ int OS_AddSW2Task(void(*task)(void), unsigned long priority) {
 	ButtonTwoInit(priority);
 	return 1;
 }
+
+void OS_InitBuzzer(void){
+	SYSCTL_RCGCPWM_R |= 0x00000002;			// Enable PWM generation using the system clock
+	SYSCTL_RCGCGPIO_R |= 0x00000020;				// Clock GPIO PF2
+	SYSCTL_RCC_R &= ~0x00100000;				// PWM clock is 80 MHz
+	GPIO_PORTF_AFSEL_R |= 0x00000004;		// Enable GPIO PF2 for alternate function
+	GPIO_PORTF_PCTL_R &= ~0x00000F00;		// Clear PWM select
+	GPIO_PORTF_PCTL_R |= 0x00000500;		// Configure PF2 for PWM signals
+	GPIO_PORTF_DEN_R |= 0x00000004;			// Set PF2 as digital pin			
+	PWM1_3_CTL_R &= ~0x00000001;				// Disable counter
+	PWM1_3_CTL_R &= ~0x00000002;				// Select down count mode
+	PWM1_3_GENA_R |= 0x0000008C;				// Initialize generator A	
+}
+
+void OS_CreateSound(int frequency){
+	int period = 1000000/440;
+	int ticks = 10*period;							// Calculate the number of ticks in a cycle
+	PWM1_3_LOAD_R = ticks;							// Load the counter
+	PWM1_3_CMPA_R = ticks/frequency-1;	// Duty cycle to select the correct note
+	PWM1_3_CTL_R = 0x00000001;
+	PWM1_ENABLE_R |= 0x00000040;
+	delay(6);
+	PWM1_3_CTL_R &= ~0x00000001;				// Disable counter
+	PWM1_3_CTL_R &= ~0x00000002;				// Select down count mode
+}
+
+void delay(int count){
+	int delayCount = 0;
+	while(delayCount < count*80000){
+		delayCount++;
+	}
+}
+
+void OS_Music(int notes[3]){
+	int i = 0;
+	while(i<3){
+		OS_CreateSound(notes[i]);
+		i++;
+	}
+}
