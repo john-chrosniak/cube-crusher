@@ -28,8 +28,7 @@
 #define VERTICALNUM 6
 #define HORIZONTALNUM 6
 #define NUMCUBES 5
-#define XGRIDSIZE 102
-#define YGRIDSIZE 102
+#define CUBESIZE 17
 
 typedef struct {
  uint32_t position[2];
@@ -43,6 +42,8 @@ typedef struct {
  //size is the number of pixels from the center on each side (size of 3 would make the cube be 7x7 pixels, 4 would be 9x9, etc.)
  uint8_t size;
  int16_t color;
+ //has the cube been yeeted?
+ bool is_alive;
 } cube;
 cube CubeArray[NUMCUBES];
 
@@ -143,6 +144,14 @@ int UpdatePosition(uint16_t rawx, uint16_t rawy, jsDataType* data){
 	if (y < 0){
 		y = 0;}
 	data->x = x; data->y = y;
+	// Check if cube is hit
+	uint i;
+	for (i = 0; i < NUMBCUBES; i++) {
+		if (CubeArray[i].position[0] == (y - 13) / CUBESIZE  && CubeArray[i].position[1] == (x - 13) / CUBESIZE) {
+			CubeArray[i].is_alive = false;
+			BSP_LCD_Cube(x, y, CUBESIZE, BGCOLOR);
+		}
+	}
 	return 1;
 }
 
