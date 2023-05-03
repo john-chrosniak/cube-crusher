@@ -377,8 +377,9 @@ void Restart(void){
 	life = 3;
 	score = 0;
 	x = 63; y = 63;
-	int noteArray[3] = {2, 3, 4};
-	OS_Music(noteArray);
+	int noteArray[9] = {415, 415, 415, 311, 311, 208, 208, 233, 233};
+	int tempoArray[9] = {3, 3, 1, 3, 3, 3, 3, 2, 3};
+	OS_Music(noteArray, tempoArray);
 	NumCreated += OS_AddThread(&Consumer,128,1); 
 	NumCreated += OS_AddThread(&Display,128,3);
   OS_Kill();  // done, OS does not return from a Kill

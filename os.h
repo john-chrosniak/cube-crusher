@@ -207,11 +207,11 @@ void OS_Launch(unsigned long theTimeSlice);
 
 void OS_InitBuzzer(void);
 
-void OS_CreateSound(int frequency);
+void OS_CreateSound(int frequency, int tempo);
 
 void OS_StopSound(void);
 
-void OS_Music(int notes[3]);
+void OS_Music(int notes[9], int tempo[9]);
 
 void delay(int count);
 

@@ -744,14 +744,14 @@ void OS_InitBuzzer(void){
 	PWM1_3_GENA_R |= 0x0000008C;				// Initialize generator A	
 }
 
-void OS_CreateSound(int frequency){
-	int period = 1000000/440;
+void OS_CreateSound(int frequency, int tempo){
+	int period = 1000000/frequency;
 	int ticks = 10*period;							// Calculate the number of ticks in a cycle
-	PWM1_3_LOAD_R = ticks;							// Load the counter
-	PWM1_3_CMPA_R = ticks/frequency-1;	// Duty cycle to select the correct note
+	PWM1_3_LOAD_R = ticks-1;							// Load the counter
+	PWM1_3_CMPA_R = ticks/2-1;	// Duty cycle to select the correct note
 	PWM1_3_CTL_R = 0x00000001;
 	PWM1_ENABLE_R |= 0x00000040;
-	delay(6);
+	delay(tempo);
 	PWM1_3_CTL_R &= ~0x00000001;				// Disable counter
 	PWM1_3_CTL_R &= ~0x00000002;				// Select down count mode
 }
@@ -763,10 +763,10 @@ void delay(int count){
 	}
 }
 
-void OS_Music(int notes[3]){
+void OS_Music(int notes[9], int tempo[9]){
 	int i = 0;
-	while(i<3){
-		OS_CreateSound(notes[i]);
+	while(i<9){
+		OS_CreateSound(notes[i], tempo[i]);
 		i++;
 	}
 }
