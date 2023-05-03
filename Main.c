@@ -28,6 +28,8 @@
 #define VERTICALNUM 6
 #define HORIZONTALNUM 6
 #define NUMCUBES 5
+#define XGRIDSIZE 102
+#define YGRIDSIZE 102
 
 typedef struct {
  uint32_t position[2];
@@ -188,9 +190,7 @@ void Producer(void){
 // foreground treads run for 2 sec and die
 // ***********ButtonWork*************
 void ButtonWork(void){
-	uint32_t StartTime,CurrentTime,ElapsedTime;
-	StartTime = OS_MsTime();
-	ElapsedTime = 0;
+	
 	OS_bWait(&LCDFree);
 	Button1RespTime = OS_MsTime() - Button1PushTime; // LCD Response here
 	BSP_LCD_FillScreen(BGCOLOR);
@@ -200,8 +200,8 @@ void ButtonWork(void){
 		CurrentTime = OS_MsTime();
 		ElapsedTime = CurrentTime - StartTime;
 		BSP_LCD_Message(0,5,0,"Life Time:",LIFETIME);
-		BSP_LCD_Message(1,0,0,"Horizontal Area:",area[0]);
-		BSP_LCD_Message(1,1,0,"Vertical Area:",area[1]);
+		BSP_LCD_Message(1,0,0,"Horizontal Area:",x);
+		BSP_LCD_Message(1,1,0,"Vertical Area:",y);
 		BSP_LCD_Message(1,2,0,"Elapsed Time:",ElapsedTime);
 		OS_Sleep(50);
 
@@ -426,33 +426,33 @@ void SW2Push(void){
 // 
 // 
 // This task implements the motions of the cubes
-void CubeThread (void){
-	// 1.allocate an idle cube for the object
-	// 2.initialize color/shape and the first direction
-	// 3.move the cube while it is not hit or expired
-	while(life){ // Implement until the game is over
-		while (not hit && not expired){
-			// first, check if the object is hit by the crosshair
-			if(hit){
-				// Increase the score
-				OS_bSignal(&CubeArray[i][j].CubeFree);
-			}
-			// second, check if the object is expired
-			else if (expired){
-				// Decrease the life
-				OS_bSignal(&CubeArray[i][j].CubeFree);
-			}
-			else{
-				// if the object is neither hit nor expired,
-				// update the cube information
-				// then, display the object
-				// last,decide next direction
-			}
-		}
-		OS_Kill(); // Cube should disappear, kill the thread
-	}
-	OS_Kill(); //Life = 0, game is over, kill the thread
-}
+// void CubeThread (void){
+// 	// 1.allocate an idle cube for the object
+// 	// 2.initialize color/shape and the first direction
+// 	// 3.move the cube while it is not hit or expired
+// 	while(life){ // Implement until the game is over
+// 		while (not hit && not expired){
+// 			// first, check if the object is hit by the crosshair
+// 			if(hit){
+// 				// Increase the score
+// 				OS_bSignal(&CubeArray[i][j].CubeFree);
+// 			}
+// 			// second, check if the object is expired
+// 			else if (expired){
+// 				// Decrease the life
+// 				OS_bSignal(&CubeArray[i][j].CubeFree);
+// 			}
+// 			else{
+// 				// if the object is neither hit nor expired,
+// 				// update the cube information
+// 				// then, display the object
+// 				// last,decide next direction
+// 			}
+// 		}
+// 		OS_Kill(); // Cube should disappear, kill the thread
+// 	}
+// 	OS_Kill(); //Life = 0, game is over, kill the thread
+// }
 
 // //--------------end of Task 8-----------------------------
 
