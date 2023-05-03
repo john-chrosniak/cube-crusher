@@ -151,6 +151,7 @@ int UpdatePosition(uint16_t rawx, uint16_t rawy, jsDataType* data){
 			CubeArray[i].is_alive = false;
 			BSP_LCD_Cube(x, y, CUBESIZE, BGCOLOR);
 		}
+		score++;
 	}
 	return 1;
 }
