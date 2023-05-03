@@ -299,6 +299,20 @@ void OS_bWait(Sema4Type *semaPt){
 #endif
 }	
 
+// ******** OS_bTry ************
+// input:  pointer to a binary semaphore
+// output: none
+uint16_t OS_bTry(Sema4Type *semaPt){
+	OS_DisableInterrupts();
+	while (semaPt->Value == 0){
+		OS_EnableInterrupts();
+		return 0;
+	}
+	semaPt->Value = 0;
+	OS_EnableInterrupts();
+	return 1;
+}	
+
 // ******** OS_bSignal ************
 // input:  pointer to a binary semaphore
 // output: none

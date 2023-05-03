@@ -85,7 +85,12 @@ void OS_bWait(Sema4Type *semaPt);
 // ******** OS_bSignal ************ 
 // input:  pointer to a binary semaphore
 // output: none
-void OS_bSignal(Sema4Type *semaPt); 
+void OS_bSignal(Sema4Type *semaPt);
+
+// ******** OS_bTry *************
+// input:  pointer to a binary semaphore
+// output: 1 if succesful, 0 if not
+uint16_t OS_bTry(Sema4Type *semaPt);
 
 //******** OS_AddThread *************** 
 // add a foregound thread to the scheduler
