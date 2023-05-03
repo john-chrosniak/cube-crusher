@@ -25,6 +25,14 @@
 #define PSEUDOPERIOD         	8000000
 #define LIFETIME             	1000
 #define RUNLENGTH            	600 // 30 seconds run length
+#define VERTICALNUM 6
+#define HORIZONTALNUM 6
+
+typedef struct {
+ uint32_t position[2];
+ Sema4Type BlockFree;
+} block;
+block BlockArray[HORIZONTALNUM][VERTICALNUM];
 
 extern Sema4Type LCDFree;
 uint16_t origin[2]; 	// The original ADC value of x,y if the joystick is not touched, used as reference
@@ -95,6 +103,8 @@ void Random_Init(){
 uint8_t getRandomNumber(void) {
 	return (uint8_t) rand();
 }
+
+
 
 //------------------Task 1--------------------------------
 // background thread executed at 20 Hz
@@ -402,12 +412,48 @@ void SW2Push(void){
 
 //--------------end of Task 7-----------------------------
 
+//------------------Task 8--------------------------------
+// 
+// 
+// This task implements the motions of the cubes
+void CubeThread (void){
+	// 1.allocate an idle cube for the object
+	// 2.initialize color/shape and the first direction
+	// 3.move the cube while it is not hit or expired
+	while(life){ // Implement until the game is over
+		while (not hit && not expired){
+			// first, check if the object is hit by the crosshair
+			if(hit){
+				// Increase the score
+				OS_bSignal(&CubeArray[i][j].CubeFree);
+			}
+			// second, check if the object is expired
+			else if (expired){
+				// Decrease the life
+				OS_bSignal(&CubeArray[i][j].CubeFree);
+			}
+			else{
+				// if the object is neither hit nor expired,
+				// update the cube information
+				// then, display the object
+				// last,decide next direction
+			}
+		}
+		OS_Kill(); // Cube should disappear, kill the thread
+	}
+	OS_Kill(); //Life = 0, game is over, kill the thread
+}
+
+// //--------------end of Task 8-----------------------------
+
 // Fill the screen with the background color
 // Grab initial joystick position to bu used as a reference
 void CrossHair_Init(void){
 	BSP_LCD_FillScreen(BGCOLOR);
 	BSP_Joystick_Input(&origin[0],&origin[1],&select);
 }
+
+
 
 //******************* Main Function**********
 int main(void){ 
