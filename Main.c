@@ -134,12 +134,12 @@ int UpdatePosition(uint16_t rawx, uint16_t rawy, jsDataType* data){
 	else{
 		y = y - ((rawy - origin[1]) >> 9);
 	}
-	if (x > 114){
-		x = 114;}
-	if (x < 13){
-		x = 13;}
-	if (y > 101){
-		y = 101;}
+	if (x > 127-(128-XGRIDSIZE)/2){
+		x = 127-(128-XGRIDSIZE)/2;}
+	if (x < (128-XGRIDSIZE)/2){
+		x = (128-XGRIDSIZE)/2;}
+	if (y > YGRIDSIZE-1){
+		y = YGRIDSIZE-1;}
 	if (y < 0){
 		y = 0;}
 	data->x = x; data->y = y;
