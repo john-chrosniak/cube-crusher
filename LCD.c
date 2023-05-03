@@ -1455,3 +1455,9 @@ void BSP_LCD_DrawCrosshair(int16_t x, int16_t y, int16_t color) {
 	BSP_LCD_DrawFastHLine(x-4, y, 9, color);
 }
 
+void BSP_LCD_Cube(int16_t x, int16_t y, int16_t size, int16_t color) {
+  int i;
+	for (i = -size; i <= size; i++){
+    BSP_LCD_DrawFastVLine(x+i, y - size, 2*size+1, color);
+  }
+}

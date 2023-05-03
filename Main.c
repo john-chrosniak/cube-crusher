@@ -27,12 +27,22 @@
 #define RUNLENGTH            	600 // 30 seconds run length
 #define VERTICALNUM 6
 #define HORIZONTALNUM 6
+#define NUMCUBES 5
 
 typedef struct {
  uint32_t position[2];
  Sema4Type BlockFree;
 } block;
 block BlockArray[HORIZONTALNUM][VERTICALNUM];
+
+typedef struct {
+ //position is the location in the 6x6 grid of blocks. Takes on values from 0-5
+ uint8_t position[2];
+ //size is the number of pixels from the center on each side (size of 3 would make the cube be 7x7 pixels, 4 would be 9x9, etc.)
+ uint8_t size;
+ int16_t color;
+} cube;
+cube CubeArray[NUMCUBES];
 
 extern Sema4Type LCDFree;
 uint16_t origin[2]; 	// The original ADC value of x,y if the joystick is not touched, used as reference
@@ -122,12 +132,12 @@ int UpdatePosition(uint16_t rawx, uint16_t rawy, jsDataType* data){
 	else{
 		y = y - ((rawy - origin[1]) >> 9);
 	}
-	if (x > 127){
-		x = 127;}
-	if (x < 0){
-		x = 0;}
-	if (y > 112 - CROSSSIZE){
-		y = 112 - CROSSSIZE;}
+	if (x > 114){
+		x = 114;}
+	if (x < 13){
+		x = 13;}
+	if (y > 101){
+		y = 101;}
 	if (y < 0){
 		y = 0;}
 	data->x = x; data->y = y;
@@ -446,9 +456,44 @@ void CubeThread (void){
 
 // //--------------end of Task 8-----------------------------
 
+//------------------Task 9--------------------------------
+// 
+// 
+// This task implements the motions of the cubes
+void CubeSpawner (void){
+	// 1.allocate an idle cube for the object
+	// 2.initialize color/shape and the first direction
+	// 3.move the cube while it is not hit or expired
+	while(life){ // Implement until the game is over
+		while (not hit && not expired){
+			// first, check if the object is hit by the crosshair
+			if(hit){
+				// Increase the score
+				OS_bSignal(&CubeArray[i][j].CubeFree);
+			}
+			// second, check if the object is expired
+			else if (expired){
+				// Decrease the life
+				OS_bSignal(&CubeArray[i][j].CubeFree);
+			}
+			else{
+				// if the object is neither hit nor expired,
+				// update the cube information
+				// then, display the object
+				// last,decide next direction
+			}
+		}
+		OS_Kill(); // Cube should disappear, kill the thread
+	}
+	OS_Kill(); //Life = 0, game is over, kill the thread
+}
+
+// //--------------end of Task 9-----------------------------
+
 // Fill the screen with the background color
 // Grab initial joystick position to bu used as a reference
 void CrossHair_Init(void){
+	BSP_LCD_FillScreen(BGCOLOR);
 	BSP_LCD_FillScreen(BGCOLOR);
 	BSP_Joystick_Input(&origin[0],&origin[1],&select);
 }
