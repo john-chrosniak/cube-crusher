@@ -29,6 +29,7 @@
 #define HORIZONTALNUM 6
 #define NUMCUBES 5
 #define CUBESIZE 17
+#define EXPIRATIONTIME_MS 5000
 
 typedef struct {
  uint32_t position[2];
@@ -44,10 +45,13 @@ typedef struct {
  int16_t color;
  //has the cube been yeeted?
  bool is_alive;
+ uint8_t direction;
+ Sema4Type CubeFree;
 } cube;
 cube CubeArray[NUMCUBES];
 
 extern Sema4Type LCDFree;
+Sema4Type scoreFree, lifeFree;
 uint16_t origin[2]; 	// The original ADC value of x,y if the joystick is not touched, used as reference
 int16_t x = 63;  			// horizontal position of the crosshair, initially 63
 int16_t y = 63;  			// vertical position of the crosshair, initially 63
@@ -144,15 +148,6 @@ int UpdatePosition(uint16_t rawx, uint16_t rawy, jsDataType* data){
 	if (y < 0){
 		y = 0;}
 	data->x = x; data->y = y;
-	// Check if cube is hit
-	uint i;
-	for (i = 0; i < NUMBCUBES; i++) {
-		if (CubeArray[i].position[0] == (y - 13) / CUBESIZE  && CubeArray[i].position[1] == (x - 13) / CUBESIZE) {
-			CubeArray[i].is_alive = false;
-			BSP_LCD_Cube(x, y, CUBESIZE, BGCOLOR);
-		}
-		score++;
-	}
 	return 1;
 }
 
@@ -404,8 +399,12 @@ void Restart(void){
   UpdateWork = 0;
 	MaxJitter = 0;       // in 1us units
 	PseudoCount = 0;
+	OS_bWait(&lifeFree);
 	life = 3;
+	OS_bSignal(&lifeFree);
+	OS_bWait(&scoreFree);
 	score = 0;
+	OS_bSignal(&scoreFree);
 	x = 63; y = 63;
 	int noteArray[9] = {415, 415, 415, 311, 311, 208, 208, 233, 233};
 	int tempoArray[9] = {3, 3, 1, 3, 3, 3, 3, 2, 3};
@@ -436,33 +435,91 @@ void SW2Push(void){
 // 
 // 
 // This task implements the motions of the cubes
-// void CubeThread (void){
-// 	// 1.allocate an idle cube for the object
-// 	// 2.initialize color/shape and the first direction
-// 	// 3.move the cube while it is not hit or expired
-// 	while(life){ // Implement until the game is over
-// 		while (not hit && not expired){
-// 			// first, check if the object is hit by the crosshair
-// 			if(hit){
-// 				// Increase the score
-// 				OS_bSignal(&CubeArray[i][j].CubeFree);
-// 			}
-// 			// second, check if the object is expired
-// 			else if (expired){
-// 				// Decrease the life
-// 				OS_bSignal(&CubeArray[i][j].CubeFree);
-// 			}
-// 			else{
-// 				// if the object is neither hit nor expired,
-// 				// update the cube information
-// 				// then, display the object
-// 				// last,decide next direction
-// 			}
-// 		}
-// 		OS_Kill(); // Cube should disappear, kill the thread
-// 	}
-// 	OS_Kill(); //Life = 0, game is over, kill the thread
-// }
+void CubeThread (void){
+	int i;
+	cube * c = 0;
+	for (i=0; i<NUMCUBES; i++){
+		OS_bWait(&(CubeArray[i].CubeFree));
+		if (!CubeArray[i].is_alive){
+			c = &(CubeArray[i]);
+			c->is_alive = true;
+		}
+		else{
+			OS_bSignal(&(CubeArray[i].CubeFree));
+		}
+	}
+	if (c == 0){
+		OS_Kill();
+	}
+	bool found_start = false;
+	while (!found_start){
+		uint8_t cube_posx = getRandomNumber()/(255/HORIZONTALNUM+1);
+		uint8_t cube_posy = getRandomNumber()/(255/VERTICALNUM+1);
+		if (OS_bTry(&(BlockArray[cube_posy][cube_posx].BlockFree))){
+			c->position[0] = cube_posy;
+			c->position[1] = cube_posx;
+			c->direction = getRandomNumber()/64;
+			found_start = true;
+		}
+
+	}
+	unsigned long cube_start_time = OS_MsTime();
+	unsigned long last_move_time = OS_MsTime();
+	while (c->is_alive && life){
+		// first, check if the object is hit by the crosshair
+		if(c->position[0] == (y - 13) / CUBESIZE  && c->position[1] == (x - 13) / CUBESIZE){
+			// Increase the score
+			CubeArray[i].is_alive = false;
+			OS_bWait(&LCDFree);
+			BSP_LCD_Cube(x, y, CUBESIZE, BGCOLOR);
+			OS_Signal(&LCDFree);
+			OS_bWait(&scoreFree);
+			score++;
+			OS_bSignal(&scoreFree);
+			OS_bSignal(&(BlockArray[c->position[0]][c->position[1]].BlockFree));
+			OS_bSignal(&(c->CubeFree));
+		}
+		// second, check if the object is expired
+		else if (OS_MsTime() - cube_start_time > EXPIRATIONTIME_MS){
+			// Decrease the life
+			CubeArray[i].is_alive = false;
+			OS_bWait(&LCDFree);
+			BSP_LCD_Cube(x, y, CUBESIZE, BGCOLOR);
+			OS_Signal(&LCDFree);
+			OS_bWait(&lifeFree);
+			life--;
+			OS_bSignal(&lifeFree);
+			OS_bSignal(&(BlockArray[c->position[0]][c->position[1]].BlockFree));
+			OS_bSignal(&(c->CubeFree));
+		}
+		else{
+			// if the object is neither hit nor expired,
+			// update the cube information
+			// then, display the object
+			// last,decide next direction
+			while (OS_MsTime() - last_move_time < CUBEMOVETIME_MS){
+				OS_Suspend();
+			}
+			uint8_t next_x = c->position[1] + (direction % 2) * ((direction/2) * 2 - 1);
+			uint8_t next_y = c->position[0] + (1 - direction % 2) * ((direction/2) * 2 - 1);
+			bool found_pos = false;
+			while (!found_pos){
+				next_x = c->position[1] + (direction % 2) * ((direction/2) * 2 - 1);
+				next_y = c->position[0] + (1 - direction % 2) * ((direction/2) * 2 - 1);
+				if (next_x < HORIZONTALNUM && next_x >= 0 && next_y < VERTICALNUM && next_y >= 0 && OS_bTry(&(BlockArray[next_y][next_x].BlockFree))){
+					OS_bSignal(&(BlockArray[c->position[0]][c->position[1]].BlockFree));
+					c->position[0] = next_y;
+					c->position[1] = next_x;
+					found_pos = true;
+				}
+				else{
+					c->direction = getRandomNumber()/64;
+				}
+			}
+		}
+	}
+	OS_Kill(); // Cube should disappear, kill the thread
+}
 
 // //--------------end of Task 8-----------------------------
 
@@ -471,29 +528,23 @@ void SW2Push(void){
 // 
 // This task implements the motions of the cubes
 void CubeSpawner (void){
-	// 1.allocate an idle cube for the object
-	// 2.initialize color/shape and the first direction
-	// 3.move the cube while it is not hit or expired
 	while(life){ // Implement until the game is over
-		while (not hit && not expired){
-			// first, check if the object is hit by the crosshair
-			if(hit){
-				// Increase the score
-				OS_bSignal(&CubeArray[i][j].CubeFree);
+		bool blocksExist = true;
+		while(blocksExist){
+			int i;
+			blocksExist = false;
+			for (i = 0; i < NUMCUBES; i++){
+				blocksExist = CubeArray[i].is_alive || blocksExist;
 			}
-			// second, check if the object is expired
-			else if (expired){
-				// Decrease the life
-				OS_bSignal(&CubeArray[i][j].CubeFree);
+			if (!blocksExist){
+				uint8_t num_cubes = getRandomNumber()/(255/(NUMCUBES)+1)+1;
+				uint8_t j;
+				for (j=0; j<num_cubes; j++){
+					OS_AddThread(&CubeThread, 128, 2);
+				}
 			}
-			else{
-				// if the object is neither hit nor expired,
-				// update the cube information
-				// then, display the object
-				// last,decide next direction
-			}
+			OS_Suspend();
 		}
-		OS_Kill(); // Cube should disappear, kill the thread
 	}
 	OS_Kill(); //Life = 0, game is over, kill the thread
 }
@@ -517,6 +568,8 @@ int main(void){
 	Device_Init();
   CrossHair_Init();
   Random_Init();
+  OS_InitSemaphore(&scoreFree, 1);
+  OS_InitSemaphore(&lifeFree, 1);
   DataLost = 0;        // lost data between producer and consumer
   NumSamples = 0;
   MaxJitter = 0;       // in 1us units
