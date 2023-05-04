@@ -64,25 +64,29 @@ void Device_Init(void){
 }
 
 void Mic_Init(void){
+	/**
+	 * Title: ADC TM4C123G Tiva C Launchpad – Measure Analog Voltage Signal
+	 * URL: Reference: https://microcontrollerslab.com/adc-tm4c123g-tiva-c-launchpad-measure-analog-voltage-signal/
+	 **/ 
 	SYSCTL_RCGCGPIO_R |= 0x00000008; 
 	while((SYSCTL_PRGPIO_R&0x8) != 0x8){};
-	// PD.0 Init
+	// PD.0 Configure for GPIO
 	GPIO_PORTD_AFSEL_R |= 0x01;
 	GPIO_PORTD_DEN_R &= ~0x01;
 	GPIO_PORTD_AMSEL_R |= 0x01;
-	// ADC 0 Init Channel 7 Init
-	ADC0_ACTSS_R &= ~0x8;
-	ADC0_EMUX_R &= ~0xF000;
-	ADC0_SSMUX3_R = 7;
-	ADC0_SSCTL3_R |= (1<<1)|(1<<2);
-	ADC0_ACTSS_R |= 0x8;
+	// ADC 0 Init Channel 7
+	ADC0_ACTSS_R &= ~0x8; // SS3 Disable
+	ADC0_EMUX_R &= ~0xF000; // Software Trigger
+	ADC0_SSMUX3_R = 7; // Analog Channel
+	ADC0_SSCTL3_R |= (1<<1)|(1<<2); // One Sample
+	ADC0_ACTSS_R |= 0x8; // SS3 Enable
 }
 
 uint16_t Sample_Microphone(void){
-	ADC0_PSSI_R |= 0x8;
-	while ((ADC0_RIS_R & 0x8) == 0){};
-	uint16_t adc_value = ADC0_SSFIFO3_R;
-	ADC0_ISC_R |= 0x8;
+	ADC0_PSSI_R |= 0x8; // Start sampling
+	while ((ADC0_RIS_R & 0x8) == 0){}; // Wait for sample
+	uint16_t adc_value = ADC0_SSFIFO3_R; // Read ADC value
+	ADC0_ISC_R |= 0x8; // Clear sample flag
 	return adc_value;
 }
 
@@ -92,6 +96,7 @@ void Random_Init(){
 	uint16_t seed = Sample_Microphone();
 	srand(seed);
 }
+
 uint8_t getRandomNumber(void) {
 	return (uint8_t) rand();
 }

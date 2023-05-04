@@ -28,9 +28,37 @@ Project File Date:  04/28/2023
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'C:\Keil_v5\ARM\ARM_Compiler_5.06u7\Bin'
 Build target 'Target 1'
 compiling Main.c...
+<<<<<<< Updated upstream
 linking...
 Program Size: Code=10476 RO-data=1436 RW-data=208 ZI-data=10344  
 ".\Objects\FinalProject.axf" - 0 Error(s), 0 Warning(s).
+=======
+Main.c(199): error:  #20: identifier "ElapsedTime" is undefined
+  	while (ElapsedTime < LIFETIME){
+Main.c(200): error:  #20: identifier "CurrentTime" is undefined
+  		CurrentTime = OS_MsTime();
+Main.c(201): error:  #20: identifier "StartTime" is undefined
+  		ElapsedTime = CurrentTime - StartTime;
+Main.c(468): error:  #20: identifier "not" is undefined
+  		while (not hit && not expired){
+Main.c(468): error:  #18: expected a ")"
+  		while (not hit && not expired){
+Main.c(470): error:  #20: identifier "hit" is undefined
+  			if(hit){
+Main.c(472): error:  #20: identifier "i" is undefined
+  				OS_bSignal(&CubeArray[i][j].CubeFree);
+Main.c(472): error:  #20: identifier "j" is undefined
+  				OS_bSignal(&CubeArray[i][j].CubeFree);
+Main.c(475): error:  #20: identifier "expired" is undefined
+  			else if (expired){
+Main.c(477): error:  #20: identifier "i" is undefined
+  				OS_bSignal(&CubeArray[i][j].CubeFree);
+Main.c(477): error:  #20: identifier "j" is undefined
+  				OS_bSignal(&CubeArray[i][j].CubeFree);
+Main.c: 0 warnings, 11 errors
+".\Objects\FinalProject.axf" - 11 Error(s), 0 Warning(s).
+Target not created.
+>>>>>>> Stashed changes
 Build Time Elapsed:  00:00:00
 </pre>
 </body>

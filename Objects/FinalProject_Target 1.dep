@@ -7,6 +7,7 @@ I (os.h)(0x644C017C)
 F (.\FIFO.h)(0x644C017B)()
 F (.\joystick.c)(0x644C017C)(--gnu -c --cpu Cortex-M4 -D__EVAL -D__MICROLIB -g -O0 --apcs=interwork --split_sections-IC:\Keil_v5\ARM\RV31\INC-IC:\Keil_v5\ARM\CMSIS\Include-IC:\Keil_v5\ARM\INC\TI\TM4C123-D__UVISION_VERSION="538" -DTM4C123GH6PM-o .\objects\joystick.o --omf_browse .\objects\joystick.crf --depend .\objects\joystick.d)
 I (C:\Keil_v5\ARM\ARM_Compiler_5.06u7\include\stdint.h)(0x5E8EF392)
+<<<<<<< Updated upstream
 I (joystick.h)(0x644C017C)
 I (tm4c123gh6pm.h)(0x644C017C)
 F (.\joystick.h)(0x644C017C)()
@@ -17,6 +18,18 @@ I (os.h)(0x644C017C)
 I (tm4c123gh6pm.h)(0x644C017C)
 F (.\LCD.h)(0x644C017B)()
 F (.\Main.c)(0x644C066C)(--gnu -c --cpu Cortex-M4 -D__EVAL -D__MICROLIB -g -O0 --apcs=interwork --split_sections-IC:\Keil_v5\ARM\RV31\INC-IC:\Keil_v5\ARM\CMSIS\Include-IC:\Keil_v5\ARM\INC\TI\TM4C123-D__UVISION_VERSION="538" -DTM4C123GH6PM-o .\objects\main.o --omf_browse .\objects\main.crf --depend .\objects\main.d)
+=======
+I (joystick.h)(0x6449B3BD)
+I (tm4c123gh6pm.h)(0x6449B3BD)
+F (.\joystick.h)(0x6449B3BD)()
+F (.\LCD.c)(0x6452DD1E)(--gnu -c --cpu Cortex-M4 -D__EVAL -D__MICROLIB -g -O0 --apcs=interwork --split_sections-IC:\Keil_v5\ARM\RV31\INC-IC:\Keil_v5\ARM\CMSIS\Include-IC:\Keil_v5\ARM\INC\TI\TM4C123-D__UVISION_VERSION="538" -DTM4C123GH6PM-o .\objects\lcd.o --omf_browse .\objects\lcd.crf --depend .\objects\lcd.d)
+I (C:\Keil_v5\ARM\ARM_Compiler_5.06u7\include\stdint.h)(0x5E8EF392)
+I (LCD.h)(0x6449B3BD)
+I (os.h)(0x6452D8C5)
+I (tm4c123gh6pm.h)(0x6449B3BD)
+F (.\LCD.h)(0x6449B3BD)()
+F (.\Main.c)(0x6452DD28)(--gnu -c --cpu Cortex-M4 -D__EVAL -D__MICROLIB -g -O0 --apcs=interwork --split_sections-IC:\Keil_v5\ARM\RV31\INC-IC:\Keil_v5\ARM\CMSIS\Include-IC:\Keil_v5\ARM\INC\TI\TM4C123-D__UVISION_VERSION="538" -DTM4C123GH6PM-o .\objects\main.o --omf_browse .\objects\main.crf --depend .\objects\main.d)
+>>>>>>> Stashed changes
 I (C:\Keil_v5\ARM\ARM_Compiler_5.06u7\include\stdint.h)(0x5E8EF392)
 I (C:\Keil_v5\ARM\ARM_Compiler_5.06u7\include\stdlib.h)(0x5E8EF392)
 I (OS.h)(0x644C017C)
