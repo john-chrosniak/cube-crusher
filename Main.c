@@ -228,7 +228,7 @@ void Consumer(void){
 		OS_bWait(&LCDFree);
 			
 		BSP_LCD_DrawCrosshair(prevx, prevy, LCD_BLACK); // Draw a black crosshair
-		BSP_LCD_DrawCrosshair(data.x, data.y, LCD_RED); // Draw a red crosshair
+		BSP_LCD_DrawCrosshair(data.x, data.y, LCD_WHITE); // Draw a red crosshair
 
 		ConsumerCount++;
 		OS_bSignal(&LCDFree);
