@@ -301,10 +301,10 @@ void OS_bWait(Sema4Type *semaPt){
 
 // ******** OS_bTry ************
 // input:  pointer to a binary semaphore
-// output: none
+// output: 0 if acquire failed, 1 if succeeded
 uint16_t OS_bTry(Sema4Type *semaPt){
 	OS_DisableInterrupts();
-	while (semaPt->Value == 0){
+	if (semaPt->Value == 0){
 		OS_EnableInterrupts();
 		return 0;
 	}
