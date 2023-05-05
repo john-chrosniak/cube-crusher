@@ -159,7 +159,7 @@ int OS_AddThread(void(*task)(void), unsigned long stackSize, unsigned long prior
 	int32_t status,thread;
   status = StartCritical();
   if (ThreadNum == NUMTHREADS){ // no available tcbs
-	  EndCritical(status);
+			EndCritical(status);
 	  return 0;
   }
   else{
