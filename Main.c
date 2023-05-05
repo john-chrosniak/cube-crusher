@@ -31,10 +31,12 @@
 #define HORIZONTALNUM 6
 #define NUMCUBES 5
 #define CUBESIZE 17
-#define EXPIRATIONTIME_MS 5000
-#define CUBEMOVETIME_MS 100
 #define XGRIDSIZE 102
 #define YGRIDSIZE 102
+
+uint16_t EXPIRATIONTIME_MS = 5000;
+uint16_t CUBEMOVETIME_MS = 100;
+uint16_t level = 1;
 
 typedef struct {
  uint32_t position[2];
@@ -68,6 +70,7 @@ int16_t life = 3;
 int16_t score = 0;
 bool spawner_active = false;
 bool game_started = false;
+uint16_t high_score = 0;
 
 unsigned long NumCreated;   		// Number of foreground threads created
 unsigned long NumSamples;   		// Incremented every ADC sample, in Producer
@@ -266,6 +269,7 @@ void Display(void){
 		OS_bWait(&LCDFree);
 		BSP_LCD_Message(1, 5, 0, "Life:",life);		
 		BSP_LCD_Message(1, 5, 9, "Score:",score);
+		BSP_LCD_Message(0, 0, 6, "Level:", level);
 		//BSP_LCD_Message(1,4,0,"PseudoCount: ",PseudoCount);
 		DisplayCount++;
 		OS_bSignal(&LCDFree);
@@ -326,6 +330,13 @@ void CubeThread (void){
 			OS_Signal(&LCDFree);
 			OS_bWait(&scoreFree);
 			score++;
+			if (score % 10 == 0) {
+				if (EXPIRATIONTIME_MS > 3000) {
+					EXPIRATIONTIME_MS -= 200;
+					CUBEMOVETIME_MS -= 5;
+					level++;
+				}
+			}
 			OS_bSignal(&scoreFree);
 			OS_bSignal(&(BlockArray[c->position[0]][c->position[1]].BlockFree));
 			OS_bSignal(&(c->CubeFree));
@@ -425,9 +436,14 @@ void CubeSpawner (void){
 	OS_bWait(&LCDFree);
 	BSP_LCD_FillScreen(BGCOLOR);
 	BSP_LCD_FillScreen(BGCOLOR);
-	BSP_LCD_Message(0, 5, 5, "Score:",score);
-	BSP_LCD_DrawString(5,6,"Press S2 to",LCD_WHITE);
-	BSP_LCD_DrawString(5,7,"Play Again!",LCD_WHITE);
+	if (score > high_score) {
+		high_score = score;
+		BSP_LCD_DrawString(3,2,"New High Score!",LCD_WHITE);
+	}
+	BSP_LCD_Message(0, 4, 8, "Score:",score);
+	BSP_LCD_Message(0, 5, 3, "High Score:",high_score);
+	BSP_LCD_DrawString(5,7,"Press S2 to",LCD_WHITE);
+	BSP_LCD_DrawString(5,8,"Play Again!",LCD_WHITE);
 	while (!game_started);
 	OS_bSignal(&LCDFree);
 	OS_Kill(); //Life = 0, game is over, kill the thread
@@ -461,6 +477,9 @@ void Restart(void){
 	OS_bSignal(&lifeFree);
 	OS_bWait(&scoreFree);
 	score = 0;
+	level = 1;
+	EXPIRATIONTIME_MS = 5000;
+	CUBEMOVETIME_MS = 100;
 	OS_bSignal(&scoreFree);
 	x = 63; y = 63;
 	int noteArray[9] = {311, 155, 233, 233, 208, 208, 155, 311, 233};
