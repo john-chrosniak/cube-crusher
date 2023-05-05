@@ -772,7 +772,7 @@ void OS_CreateSound(int frequency, int tempo){
 
 void delay(int count){
 	int delayCount = 0;
-	while(delayCount < count*80000){
+	while(delayCount < count*100000){
 		delayCount++;
 	}
 }

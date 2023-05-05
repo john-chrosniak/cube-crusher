@@ -336,6 +336,7 @@ void CubeThread (void){
 			c->is_alive = false;
 			OS_bWait(&LCDFree);
 			BSP_LCD_Cube(CUBESIZE*c->position[1]+CUBESIZE/2+13, CUBESIZE*c->position[0]+CUBESIZE/2, CUBESIZE, BGCOLOR);
+			OS_CreateSound(262, 1);
 			OS_Signal(&LCDFree);
 			OS_bWait(&scoreFree);
 			score++;
@@ -429,6 +430,9 @@ void CubeSpawner (void){
 			OS_Suspend();
 		}
 	}
+	int noteArray[9] = {415, 415, 415, 311, 311, 208, 208, 233, 233};
+	int tempoArray[9] = {3, 3, 1, 3, 3, 3, 3, 2, 3};
+	OS_Music(noteArray, tempoArray);
 	spawner_active = false;
 	OS_Kill(); //Life = 0, game is over, kill the thread
 }
@@ -462,8 +466,8 @@ void Restart(void){
 	score = 0;
 	OS_bSignal(&scoreFree);
 	x = 63; y = 63;
-	int noteArray[9] = {415, 415, 415, 311, 311, 208, 208, 233, 233};
-	int tempoArray[9] = {3, 3, 1, 3, 3, 3, 3, 2, 3};
+	int noteArray[9] = {311, 155, 233, 233, 208, 208, 155, 311, 233};
+	int tempoArray[9] = {2, 1, 2, 2, 1, 1, 2, 2, 3};
 	OS_Music(noteArray, tempoArray);
 	if (!spawner_active){
 		NumCreated += OS_AddThread(&CubeSpawner,128,2); 
@@ -538,6 +542,10 @@ int main(void){
 	NumCreated += OS_AddThread(&CubeSpawner, 128, 2); 
 	// NumCreated += OS_AddThread(&CubeNumCalc, 128, 3); 
 	NumCreated += OS_AddThread(&Display, 128, 1);
+	
+	int noteArray[9] = {311, 155, 233, 233, 208, 208, 155, 311, 233};
+	int tempoArray[9] = {32, 16, 32, 32, 16, 16, 32, 32, 48};
+	OS_Music(noteArray, tempoArray);
 
 	OS_Launch(TIME_2MS); // doesn't return, interrupts enabled in here
 	return 0;            // this never executes
