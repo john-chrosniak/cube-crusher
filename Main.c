@@ -257,6 +257,7 @@ void Consumer(void){
   OS_Kill();  // done
 }
 
+void do_noting(void) {}
 
 //--------------end of Task 3-----------------------------
 
@@ -497,6 +498,7 @@ void Restart(void){
 // background threads execute once and return
 void SW1Push(void){
 	game_started = true;	
+	OS_AddSW1Task(*do_noting, 5);
 }
 
 //************SW2Push*************
