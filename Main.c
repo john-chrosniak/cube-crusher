@@ -67,6 +67,7 @@ uint32_t PseudoCount;
 int16_t life = 3;
 int16_t score = 0;
 bool spawner_active = false;
+bool game_started = false;
 
 unsigned long NumCreated;   		// Number of foreground threads created
 unsigned long NumSamples;   		// Incremented every ADC sample, in Producer
@@ -225,21 +226,6 @@ void Producer(void){
 //   OS_Kill();  // done, OS does not return from a Kill
 // } 
 
-//************SW1Push*************
-// Called when SW1 Button pushed
-// Adds another foreground task
-// background threads execute once and return
-// void SW1Push(void){
-//   if(OS_MsTime() > 20 ){ // debounce
-//     if(OS_AddThread(&ButtonWork,128,4)){
-// 			OS_ClearMsTime();
-//       NumCreated++; 
-//     }
-//     OS_ClearMsTime();  // at least 20ms between touches
-// 		Button1PushTime = OS_MsTime(); // Time stamp
-
-//   }
-// }
 
 //--------------end of Task 2-----------------------------
 
@@ -257,7 +243,7 @@ void Consumer(void){
 		OS_bWait(&LCDFree);
 			
 		BSP_LCD_DrawCrosshair(prevx, prevy, LCD_BLACK); // Draw a black crosshair
-		BSP_LCD_DrawCrosshair(data.x, data.y, LCD_WHITE); // Draw a red crosshair
+		BSP_LCD_DrawCrosshair(data.x, data.y, LCD_RED); // Draw a red crosshair
 
 		ConsumerCount++;
 		OS_bSignal(&LCDFree);
@@ -430,6 +416,16 @@ void CubeSpawner (void){
 		}
 	}
 	spawner_active = false;
+	game_started = false;
+	OS_Sleep(50); // wait
+	OS_bWait(&LCDFree);
+	BSP_LCD_FillScreen(BGCOLOR);
+	BSP_LCD_FillScreen(BGCOLOR);
+	BSP_LCD_Message(0, 5, 5, "Score:",score);
+	BSP_LCD_DrawString(5,6,"Press S2 to",LCD_WHITE);
+	BSP_LCD_DrawString(5,7,"Play Again!",LCD_WHITE);
+	while (!game_started);
+	OS_bSignal(&LCDFree);
 	OS_Kill(); //Life = 0, game is over, kill the thread
 }
 
@@ -441,6 +437,7 @@ void CubeSpawner (void){
 // ***********ButtonWork2*************
 void Restart(void){
 	uint32_t StartTime,CurrentTime,ElapsedTime;
+	game_started = true;
 	OS_Sleep(50); // wait
 	StartTime = OS_MsTime();
 	ElapsedTime = 0;
@@ -470,6 +467,14 @@ void Restart(void){
 	}
   OS_Kill();  // done, OS does not return from a Kill
 } 
+
+//************SW1Push*************
+// Called when SW1 Button pushed
+// Adds another foreground task
+// background threads execute once and return
+void SW1Push(void){
+	game_started = true;	
+}
 
 //************SW2Push*************
 // Called when Button2 pushed
@@ -521,23 +526,28 @@ int main(void){
 	NumSamples = 0;
 	MaxJitter = 0;       // in 1us units
 	PseudoCount = 0;
+	BSP_LCD_FillScreen(BGCOLOR);
+	BSP_LCD_DrawString(1, 6, "Press S1 to Start!", LCD_WHITE);
+	OS_AddSW1Task(&SW1Push, 4);
 
+	while (!game_started);
+	BSP_LCD_FillScreen(BGCOLOR);
+	BSP_LCD_FillScreen(BGCOLOR);
 	//********initialize communication channels
 	JsFifo_Init();
 
 	//*******attach background tasks***********
-	//   OS_AddSW1Task(&SW1Push, 4);
 	OS_AddSW2Task(&SW2Push, 4);
-	OS_AddPeriodicThread(&Producer, PERIOD, 1); // 2 kHz real time sampling of PD3
 	// OS_AddPeriodicThread(&PeriodicUpdater, PSEUDOPERIOD, 3);
+	OS_AddPeriodicThread(&Producer, PERIOD, 1); // 2 kHz real time sampling of PD3
 
 	NumCreated = 0 ;
 	// create initial foreground threads
-	//   NumCreated += OS_AddThread(&Interpreter, 128, 2); 
 	NumCreated += OS_AddThread(&Consumer, 128, 1); 
-	NumCreated += OS_AddThread(&CubeSpawner, 128, 2); 
-	// NumCreated += OS_AddThread(&CubeNumCalc, 128, 3); 
 	NumCreated += OS_AddThread(&Display, 128, 1);
+	NumCreated += OS_AddThread(&CubeSpawner,128,2);
+	//   NumCreated += OS_AddThread(&Interpreter, 128, 2); 
+	// NumCreated += OS_AddThread(&CubeNumCalc, 128, 3); 
 
 	OS_Launch(TIME_2MS); // doesn't return, interrupts enabled in here
 	return 0;            // this never executes
