@@ -289,3 +289,6 @@ void BSP_LCD_OutputInit(void);
 //					y 			specifies line number (0-5)
 // outputs: none
 void BSP_LCD_DrawCrosshair(int16_t x, int16_t y, int16_t bgColor);
+
+
+void BSP_LCD_Cube(int16_t x, int16_t y, int16_t size, int16_t color);

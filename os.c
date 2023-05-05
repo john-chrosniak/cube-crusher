@@ -159,7 +159,7 @@ int OS_AddThread(void(*task)(void), unsigned long stackSize, unsigned long prior
 	int32_t status,thread;
   status = StartCritical();
   if (ThreadNum == NUMTHREADS){ // no available tcbs
-	  EndCritical(status);
+			EndCritical(status);
 	  return 0;
   }
   else{
@@ -297,6 +297,20 @@ void OS_bWait(Sema4Type *semaPt){
 	semaPt->Value = 0;
 	OS_EnableInterrupts();
 #endif
+}	
+
+// ******** OS_bTry ************
+// input:  pointer to a binary semaphore
+// output: 0 if acquire failed, 1 if succeeded
+uint16_t OS_bTry(Sema4Type *semaPt){
+	OS_DisableInterrupts();
+	if (semaPt->Value == 0){
+		OS_EnableInterrupts();
+		return 0;
+	}
+	semaPt->Value = 0;
+	OS_EnableInterrupts();
+	return 1;
 }	
 
 // ******** OS_bSignal ************
